@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const app = express();
 const port = process.env.port || 3020;
@@ -49,6 +51,7 @@ function readLinesFunc(rl) {
         let barcode2 = barcode.substring(1, 14);
 
         data.push(origin_timestamp+" "+barcode2); 
+        // data.push(`${origin_timestamp} ${barcode2}`);
     });
     
 
@@ -74,13 +77,15 @@ function readLinesFunc(rl) {
  
         console.log("Connected to db");
             
-        for(let i = 0; i < data.length; i++){ 
+        for(let i = 0; i < data.length; i++) { 
             // console.log(data[i]);
             var k1 = data[i].substring(0, 12);
             var k2 = data[i].substring(13, 28);
-            var k3 = "'"+k1+"'";
 
-            var sql = "INSERT INTO sausage_entries (origin_timestamp, barcode) VALUES ("+k3+", "+k2+")";
+            var k3 = "'"+k1+"'";
+            // console.log(k3);
+
+            var sql = "INSERT INTO sausage_entries (origin_timestamp, barcode) VALUES ("+k3+", "+k2+") ";
             dbConn.query(sql, function (err, result) {
                 if (err) {
                     console.log(err);
