@@ -65,24 +65,6 @@ function readLinesFunc() {
 
         data.push(origin_timestamp+" "+barcode2); 
     });
-    
-
-    //Initializing connection string
-    // var dbConfig = {
-    //     user: "sa",
-    //     password: "switcher@Dev12",
-    //     server: "localhost",
-    //     port: 1433,
-    //     database: "calibra",
-    //     stream: false,
-    //     options: {
-    //         trustedConnection: true,
-    //         encrypt: true,
-    //         enableArithAbort: true,
-    //         trustServerCertificate: true,
-
-    //     },
-    // };
 
     //Initializing connection string
     var dbConfig = {
