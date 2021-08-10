@@ -18,32 +18,43 @@ app.use(cors());
 
 const readline = require('readline');
 const fs = require('fs');
-var file = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\codeLog_20210805.txt';
+
+var today = new Date();
+var dd = String(today.getDate()).padStart(2, '0');
+var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+var yyyy = today.getFullYear();
+
+today = yyyy + mm + dd;
+var file_name = 'codeLog_'+ today + '.txt';
+var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\'+  file_name;
+
 
 var minutes = 1,
     the_interval = minutes * 60 * 1000;
 setInterval(function () {
 
-    var rl = readline.createInterface({
-        input: fs.createReadStream(file),
-        output: process.stdout,
-        terminal: false
-    });
+    if (fs.existsSync(file_path)) {
 
-    console.log("I am reading every 6 seconds");
-    readLinesFunc(rl);
+        console.log("Service is reading "+ file_path +" every "+ minutes +" minutes");
+        readLinesFunc();
+        
+    } else {
+        console.log('no file available')
+    }
 
 }, the_interval);
 
-var rl = readline.createInterface({
-        input: fs.createReadStream(file),
+
+
+const data = [];
+
+function readLinesFunc() {
+    var rl = readline.createInterface({
+        input: fs.createReadStream(file_path),
         output: process.stdout,
         terminal: false
     });
 
-const data = [];
-
-function readLinesFunc(rl) {
     rl.on('line', function (line) {
         let origin_timestamp = line.substring(0, 12);
 
@@ -51,7 +62,6 @@ function readLinesFunc(rl) {
         let barcode2 = barcode.substring(1, 14);
 
         data.push(origin_timestamp+" "+barcode2); 
-        // data.push(`${origin_timestamp} ${barcode2}`);
     });
     
 
@@ -79,20 +89,25 @@ function readLinesFunc(rl) {
             
         for(let i = 0; i < data.length; i++) { 
             // console.log(data[i]);
-            var k1 = data[i].substring(0, 12);
+            var k1 = data[i].substring(0, 12) + ' ' + today;
             var k2 = data[i].substring(13, 28);
 
             var k3 = "'"+k1+"'";
-            // console.log(k3);
 
             var sql = "INSERT INTO sausage_entries (origin_timestamp, barcode) VALUES ("+k3+", "+k2+") ";
             dbConn.query(sql, function (err, result) {
                 if (err) {
-                    console.log(err);
+                    // console.log(err);
                 }
-                console.log("1 record inserted");
+                
+                if(i == 1){
+                    console.log('started inserting .....');  
+
+                } else if (i == (data.length - 1)) {
+                    console.log('done inserting'); 
+                }
             });
-            
+                       
         }
         
     });
