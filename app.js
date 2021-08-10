@@ -4,6 +4,8 @@ const express = require('express');
 const app = express();
 const port = process.env.port || 3020;
 
+require('dotenv').config({path:__dirname+'/./.env'})
+
 var sql = require("mssql");
 var cors = require('cors');
 
@@ -29,7 +31,7 @@ var file_name = 'codeLog_'+ today + '.txt';
 var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\'+  file_name;
 
 
-var minutes = 1,
+var minutes = 0.1,
     the_interval = minutes * 60 * 1000;
 setInterval(function () {
 
@@ -66,12 +68,29 @@ function readLinesFunc() {
     
 
     //Initializing connection string
+    // var dbConfig = {
+    //     user: "sa",
+    //     password: "switcher@Dev12",
+    //     server: "localhost",
+    //     port: 1433,
+    //     database: "calibra",
+    //     stream: false,
+    //     options: {
+    //         trustedConnection: true,
+    //         encrypt: true,
+    //         enableArithAbort: true,
+    //         trustServerCertificate: true,
+
+    //     },
+    // };
+
+    //Initializing connection string
     var dbConfig = {
-        user: "sa",
-        password: "switcher@Dev12",
-        server: "localhost",
-        port: 1433,
-        database: "calibra",
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        server: process.env.DB_HOST,
+        port: parseInt(process.env.DB_PORT),
+        database: process.env.DB_DATABASE,
         stream: false,
         options: {
             trustedConnection: true,
