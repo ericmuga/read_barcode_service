@@ -95,6 +95,8 @@ function readLinesFunc() {
 
             var k3 = "'"+k1+"'";
 
+            console.log(k1, k3);
+
             var sql = "INSERT INTO sausage_entries (origin_timestamp, barcode) VALUES ("+k3+", "+k2+") ";
             dbConn.query(sql, function (err, result) {
                 if (err) {
