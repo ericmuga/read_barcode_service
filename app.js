@@ -4,9 +4,16 @@ const express = require('express');
 const app = express();
 const port = process.env.port || 3020;
 
-require('dotenv').config({path:__dirname+'/./.env'})
+require('dotenv').config({
+    path: __dirname + '/./.env'
+})
 
-var sql = require("mssql");
+
+
+var {
+    sql,
+    dbConnect
+} = require('./db.connect');
 var cors = require('cors');
 
 
@@ -27,19 +34,19 @@ var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
 var yyyy = today.getFullYear();
 
 today = yyyy + mm + dd;
-var file_name = 'codeLog_'+ today + '.txt';
-var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\'+  file_name;
+var file_name = 'codeLog_' + today + '.txt';
+var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\' + file_name;
 
 
 var minutes = 0.1,
     the_interval = minutes * 60 * 1000;
-setInterval(function () {
+setInterval(() => {
 
     if (fs.existsSync(file_path)) {
 
-        console.log("Service is reading "+ file_path +" every "+ minutes +" minutes");
+        console.log("Service is reading " + file_path + " every " + minutes + " minutes");
         readLinesFunc();
-        
+
     } else {
         console.log('no file available')
     }
@@ -47,8 +54,8 @@ setInterval(function () {
 }, the_interval);
 
 
-
 const data = [];
+
 
 function readLinesFunc() {
     var rl = readline.createInterface({
@@ -57,64 +64,53 @@ function readLinesFunc() {
         terminal: false
     });
 
-    rl.on('line', function (line) {
+    rl.on('line', (line) => {
         let origin_timestamp = line.substring(0, 12);
 
         let barcode = line.substring(line.length - 15);
         let barcode2 = barcode.substring(1, 14);
 
-        data.push(origin_timestamp+" "+barcode2); 
+        data.push(origin_timestamp + " " + barcode2);
+
+    }).on('close', () => {
+        insert();
     });
 
-    //Initializing connection string
-    var dbConfig = {
-        user: process.env.DB_USERNAME,
-        password: process.env.DB_PASSWORD,
-        server: process.env.DB_HOST,
-        port: parseInt(process.env.DB_PORT),
-        database: process.env.DB_DATABASE,
-        stream: false,
-        options: {
-            trustedConnection: true,
-            encrypt: true,
-            enableArithAbort: true,
-            trustServerCertificate: true,
+}
 
-        },
-    };
+const insert = () => {
+    dbConnect()
+        .then(function (pool) {
+            for (let i = 0; i < data.length; i++) {
+                var k1 = data[i].substring(0, 12) + ' ' + today;
+                var k2 = data[i].substring(13, 28);
 
-    var dbConn = new sql.ConnectionPool(dbConfig);
-    dbConn.connect().then(function () {
- 
-        console.log("Connected to db");
-            
-        for(let i = 0; i < data.length; i++) { 
-            // console.log(data[i]);
-            var k1 = data[i].substring(0, 12) + ' ' + today;
-            var k2 = data[i].substring(13, 28);
+                var k3 = "'" + k1 + "'";
 
-            var k3 = "'"+k1+"'";
+                // console.log(k1, k3);
 
-            console.log(k1, k3);
+                var stmt = "INSERT INTO sausage_entries (origin_timestamp, barcode) VALUES (" + k3 + ", " + k2 + ") ";
+                // console.log('before insert');
+                var request = new sql.Request(pool);
+                request.query(stmt, function (err, result) {
 
-            var sql = "INSERT INTO sausage_entries (origin_timestamp, barcode) VALUES ("+k3+", "+k2+") ";
-            dbConn.query(sql, function (err, result) {
-                if (err) {
-                    // console.log(err);
-                }
-                
-                if(i == 1){
-                    console.log('started inserting .....');  
+                    if (err) {
+                        // console.log(err);
+                        return;
+                    }
+                    // console.log('result', result);
+                    if (i == 1) {
+                        // console.log('started inserting .....');
 
-                } else if (i == (data.length - 1)) {
-                    console.log('done inserting'); 
-                }
-            });
-                       
-        }
-        
-    });
+                    } else if (i == (data.length - 1)) {
+                        console.log('done inserting');
+                    }
+                });
 
+            }
+        }).catch(function () {
+            console.log('error from connection');
+        });
 }
 
 app.listen(port, function () {
