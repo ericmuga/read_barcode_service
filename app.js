@@ -8,19 +8,17 @@ require('dotenv').config({
     path: __dirname + '/./.env'
 })
 
-
-
 var {
     sql,
     dbConnect
 } = require('./db.connect');
 var cors = require('cors');
 
-
 // Body Parser Middleware
 app.use(express.urlencoded({
     extended: true
 }));
+
 app.use(express.json());
 
 app.use(cors());
@@ -98,7 +96,7 @@ const insert = () => {
                         // console.log(err);
                         return;
                     }
-                    // console.log('result', result);
+
                     if (i == 1) {
                         console.log('started inserting .....');
 

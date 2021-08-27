@@ -24,6 +24,7 @@ var dbConfig = {
         idleTimeoutMillis: 10000
     },
 };
+
 const dbConnect = () => {
     return new Promise(function (resolve, reject) {
 
