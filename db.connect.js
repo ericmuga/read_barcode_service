@@ -18,6 +18,11 @@ var dbConfig = {
         trustServerCertificate: true,
 
     },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 10000
+    },
 };
 const dbConnect = () => {
     return new Promise(function (resolve, reject) {

@@ -100,7 +100,7 @@ const insert = () => {
                     }
                     // console.log('result', result);
                     if (i == 1) {
-                        // console.log('started inserting .....');
+                        console.log('started inserting .....');
 
                     } else if (i == (data.length - 1)) {
                         console.log('done inserting');
