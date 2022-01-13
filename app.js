@@ -2,17 +2,14 @@
 
 const express = require('express');
 const app = express();
-const port = process.env.port || 3020;
+const port = process.env.port || 3025;
+const axios = require('axios')
+
+var cors = require('cors');
 
 require('dotenv').config({
     path: __dirname + '/./.env'
 })
-
-var {
-    sql,
-    dbConnect
-} = require('./db.connect');
-var cors = require('cors');
 
 // Body Parser Middleware
 app.use(express.urlencoded({
@@ -35,8 +32,7 @@ today = yyyy + mm + dd;
 var file_name = 'codeLog_' + today + '.txt';
 var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\' + file_name;
 
-
-var minutes = 0.1,
+var minutes = 1,
     the_interval = minutes * 60 * 1000;
 setInterval(() => {
 
@@ -46,16 +42,14 @@ setInterval(() => {
         readLinesFunc();
 
     } else {
-        console.log('no file available')
+        console.log('no file available named ' + file_path)
     }
 
 }, the_interval);
 
+var data = [];
 
-const data = [];
-
-
-function readLinesFunc() {
+const readLinesFunc = () => {
     var rl = readline.createInterface({
         input: fs.createReadStream(file_path),
         output: process.stdout,
@@ -71,44 +65,23 @@ function readLinesFunc() {
         data.push(origin_timestamp + " " + barcode2);
 
     }).on('close', () => {
-        insert();
+        // insert();
+        insertData();
     });
 
 }
 
-const insert = () => {
-    dbConnect()
-        .then(function (pool) {
-            for (let i = 0; i < data.length; i++) {
-                var k1 = data[i].substring(0, 12) + ' ' + today;
-                var k2 = data[i].substring(13, 28);
-
-                var k3 = "'" + k1 + "'";
-
-                // console.log(k1, k3);
-
-                var stmt = "INSERT INTO sausage_entries (origin_timestamp, barcode) VALUES (" + k3 + ", " + k2 + ") ";
-                // console.log('before insert');
-                var request = new sql.Request(pool);
-                request.query(stmt, function (err, result) {
-
-                    if (err) {
-                        // console.log(err);
-                        return;
-                    }
-
-                    if (i == 1) {
-                        console.log('started inserting .....');
-
-                    } else if (i == (data.length - 1)) {
-                        console.log('done inserting');
-                    }
-                });
-
-            }
-        }).catch(function () {
-            console.log('error from connection');
-        });
+const insertData = () => {
+    axios.post('http://localhost:8181/api/barcodes-insert', {
+            request_data: data
+        })
+        .then(res => {
+            // console.log('statusCode: ${res.status}')
+            console.log(res.data)
+        })
+        .catch(error => {
+            console.error(error)
+        })
 }
 
 app.listen(port, function () {
