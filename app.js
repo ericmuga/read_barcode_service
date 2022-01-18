@@ -32,7 +32,7 @@ today = yyyy + mm + dd;
 var file_name = 'codeLog_' + today + '.txt';
 var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\' + file_name;
 
-var minutes = 5,
+var minutes = 1,
     the_interval = minutes * 60 * 1000;
 setInterval(() => {
 
@@ -47,7 +47,7 @@ setInterval(() => {
 
 }, the_interval);
 
-var data = [];
+var read_data = [];
 
 const readLinesFunc = () => {
     var rl = readline.createInterface({
@@ -62,21 +62,40 @@ const readLinesFunc = () => {
         let barcode = line.substring(line.length - 15);
         let barcode2 = barcode.substring(1, 14);
 
-        data.push(origin_timestamp + " " + barcode2);
+        read_data.push(origin_timestamp + " " + barcode2);
 
     }).on('close', () => {
-        insertData();
+        getLastEntry().then(response => {
+            console.log('last entry: ' + response);
+            var search_item = response.substr(0, response.indexOf(' '));
+            console.log('seaching: ' + search_item);
+            var filtered = read_data.filter(function (value, index, arr) {
+                return value > search_item;
+            });
+            console.log('filtered no: ' + filtered.length)
+            insertData(filtered);
+        });
     });
 
 }
 
-const insertData = () => {
+function getLastEntry() {
+    return axios.post('http://localhost:8181/api/last-insert')
+        .then(response => {
+            return response.data
+        })
+        .catch(error => {
+            console.log(error);
+            return Promise.reject(error);
+        });
+}
+
+const insertData = (filtered) => {
     axios.post('http://localhost:8181/api/barcodes-insert', {
-            request_data: data
+            request_data: filtered
         })
         .then(res => {
-            // console.log('statusCode: ${res.status}')
-            console.log('success');
+            console.log(res.data);
         })
         .catch(error => {
             console.error(error)
