@@ -32,22 +32,23 @@ today = yyyy + mm + dd;
 var file_name = 'codeLog_' + today + '.txt';
 var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\' + file_name;
 
-var minutes = 1,
+var minutes = 0.3,
     the_interval = minutes * 60 * 1000;
 setInterval(() => {
 
     if (fs.existsSync(file_path)) {
 
-        //console.log("Service is reading " + file_path + " every " + minutes + " minutes");
+        console.log("Service is reading " + file_path + " every " + minutes + " minutes");
         readLinesFunc();
 
     } else {
-        //console.log('no file available named ' + file_path)
+        console.log('no file available named ' + file_path)
     }
 
 }, the_interval);
 
 var read_data = [];
+var filtered = [];
 
 const readLinesFunc = () => {
     var rl = readline.createInterface({
@@ -69,10 +70,16 @@ const readLinesFunc = () => {
             console.log('last entry: ' + response);
             var search_item = response.substr(0, response.indexOf(' '));
             console.log('seaching: ' + search_item);
-            var filtered = read_data.filter(function (value, index, arr) {
-                return value > search_item;
-            });
-            console.log('filtered no: ' + filtered.length)
+
+            if (search_item == '') {
+                filtered = read_data;
+
+            } else {
+                filtered = read_data.filter(function (value, index, arr) {
+                    return value > search_item;
+                });
+            }
+            console.log('filtered array length: ' + filtered.length)
             insertData(filtered);
         });
     });
