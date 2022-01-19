@@ -22,6 +22,9 @@ app.use(cors());
 
 const readline = require('readline');
 const fs = require('fs');
+const {
+    set
+} = require('express/lib/application');
 
 var today = new Date();
 var dd = String(today.getDate()).padStart(2, '0');
@@ -47,10 +50,10 @@ setInterval(() => {
 
 }, the_interval);
 
-var read_data = [];
-var filtered = [];
-
 const readLinesFunc = () => {
+    var read_data = [];
+    var filtered = [];
+
     var rl = readline.createInterface({
         input: fs.createReadStream(file_path),
         output: process.stdout,
@@ -68,15 +71,13 @@ const readLinesFunc = () => {
     }).on('close', () => {
         getLastEntry().then(response => {
             console.log('last entry: ' + response);
-            var search_item = response.substr(0, response.indexOf(' '));
-            console.log('seaching: ' + search_item);
 
-            if (search_item == '') {
+            if (response == '') {
                 filtered = read_data;
 
             } else {
                 filtered = read_data.filter(function (value, index, arr) {
-                    return value > search_item;
+                    return value > response;
                 });
             }
             console.log('filtered array length: ' + filtered.length)
