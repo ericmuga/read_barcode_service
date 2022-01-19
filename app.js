@@ -80,7 +80,7 @@ const readLinesFunc = () => {
 }
 
 function getLastEntry() {
-    return axios.post('http://localhost:8181/api/last-insert')
+    return axios.post('http://fcl-bc-02:8181/api/last-insert')
         .then(response => {
             return response.data
         })
@@ -91,7 +91,7 @@ function getLastEntry() {
 }
 
 const insertData = (filtered) => {
-    axios.post('http://localhost:8181/api/barcodes-insert', {
+    axios.post('http://fcl-bc-02:8181/api/barcodes-insert', {
             request_data: filtered
         })
         .then(res => {
