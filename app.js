@@ -26,23 +26,23 @@ const {
     set
 } = require('express/lib/application');
 
-var today = new Date();
-var dd = String(today.getDate()).padStart(2, '0');
-var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-var yyyy = today.getFullYear();
-
-today = yyyy + mm + dd;
-var file_name = 'codeLog_' + today + '.txt';
-var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\' + file_name;
 
 var minutes = 0.3,
     the_interval = minutes * 60 * 1000;
 setInterval(() => {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+
+    today = yyyy + mm + dd;
+    var file_name = 'codeLog_' + today + '.txt';
+    var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\' + file_name;
 
     if (fs.existsSync(file_path)) {
 
         console.log("Service is reading " + file_path + " every " + minutes + " minutes");
-        readLinesFunc();
+        readLinesFunc(file_path);
 
     } else {
         console.log('no file available named ' + file_path)
@@ -50,7 +50,7 @@ setInterval(() => {
 
 }, the_interval);
 
-const readLinesFunc = () => {
+const readLinesFunc = (file_path) => {
     var read_data = [];
     var filtered = [];
 
