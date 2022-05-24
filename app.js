@@ -26,18 +26,18 @@ const {
     set
 } = require('express/lib/application');
 
+let getFilePath = () => {
+    let today = new Date().toLocaleDateString().replaceAll('/', '_')
+    let filePath = 'D:\\BarcodeLogs\\codeLog-' + today + '.txt';
+    return filePath;
+}
 
-var minutes = 0.3,
+
+var minutes = 1,
     the_interval = minutes * 60 * 1000;
 setInterval(() => {
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-    var yyyy = today.getFullYear();
 
-    today = yyyy + mm + dd;
-    var file_name = 'codeLog_' + today + '.txt';
-    var file_path = 'C:\\Users\\EKaranja\\OneDrive - Farmers Choice Limited\\Documents\\DataMax\\log\\' + file_name;
+    var file_path = getFilePath();
 
     if (fs.existsSync(file_path)) {
 
@@ -61,12 +61,14 @@ const readLinesFunc = (file_path) => {
     });
 
     rl.on('line', (line) => {
-        let origin_timestamp = line.substring(0, 12);
+        let line_splits = line.split(" ")
+        let origin_timestamp = line_splits[0];
+        let scanner_ip = line_splits[1];
 
-        let barcode = line.substring(line.length - 15);
-        let barcode2 = barcode.substring(1, 14);
+        let barcode = line_splits[2];
+        // let barcode2 = barcode.substring(1, 14);
 
-        read_data.push(origin_timestamp + " " + barcode2);
+        read_data.push(origin_timestamp + " " + scanner_ip + " " + barcode);
 
     }).on('close', () => {
         getLastEntry().then(response => {
@@ -84,11 +86,11 @@ const readLinesFunc = (file_path) => {
             insertData(filtered);
         });
     });
-
 }
 
 function getLastEntry() {
-    return axios.post('http://fcl-bc-02:8181/api/last-insert')
+    // return axios.post('http://fcl-bc-02:8181/api/last-insert')
+    return axios.post('http://localhost:8181/api/last-insert')
         .then(response => {
             return response.data
         })
@@ -99,7 +101,8 @@ function getLastEntry() {
 }
 
 const insertData = (filtered) => {
-    axios.post('http://fcl-bc-02:8181/api/barcodes-insert', {
+    // axios.post('http://fcl-bc-02:8181/api/barcodes-insert', {
+    axios.post('http://localhost:8181/api/barcodes-insert', {
             request_data: filtered
         })
         .then(res => {
@@ -111,5 +114,5 @@ const insertData = (filtered) => {
 }
 
 app.listen(port, function () {
-    console.log("Read-barcode-lines service started on port " + port);
+    console.log(`Read-barcode-lines service running on port ${port}`);
 })
